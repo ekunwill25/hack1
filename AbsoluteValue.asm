@@ -1,45 +1,55 @@
-// Load R0 into D register for checking and operations
+// Load R0 into D register for comparison and manipulation
 @R0
 D=M
 
+// Preserve R0 by storing it back immediately if needed
+@R0
+M=D
+
 // Check if the value is the most negative number, -32768
 @IS_MIN_INT
-D;JEQ  // Jump if D equals -32768, which is 1000000000000000 in binary
+D;JEQ  // Jump if D equals -32768
 
-// Process if not -32768
-@IS_NEGATIVE
-D;JLT  // Jump if negative to compute absolute value
+// Check if the number is non-negative
+@STORE_POSITIVE
+D;JGE  // Jump to store positive value directly
 
-// Store the positive value or zero directly in R2
-@R2
-M=D     // Store D in R2 since it's already positive or zero
-@R1
-M=0     // Set R1 to 0, computation successful
-@END
-0;JMP
+// Compute the absolute value for negative numbers
+@NEGATIVE_VALUE
+0;JMP  // Jump to compute absolute for a negative number
 
-// Label for handling the minimum integer case
 (IS_MIN_INT)
+    // Handle -32768: set R1 to 1, and do not change R2 or R0
     @R1
-    M=1     // Set R1 to 1, indicating error in absolute value computation
-    @R2
-    M=0     // Optionally set R2 to 0 or any error indicating value
+    M=1     // Indicate error as we cannot compute the absolute
     @END
     0;JMP
 
-// Label for handling negative non-minimum integers
-(IS_NEGATIVE)
+(STORE_POSITIVE)
+    // Non-negative number: Copy R0 to R2, R1 remains as R0
     @R0
-    D=M     // Reload R0 to D
-    D=-D    // Negate D to get the absolute value
+    D=M
     @R2
-    M=D     // Store the absolute value in R2
+    M=D
     @R1
-    M=0     // Set R1 to 0, computation successful
+    M=D     // Set R1 to R0 as computation is successful
     @END
     0;JMP
 
-// Label for ending the program
+(NEGATIVE_VALUE)
+    // Negative number: Compute the absolute value
+    @R0
+    D=M
+    D=-D    // Negate the number to get the absolute value
+    @R2
+    M=D
+    @R0
+    D=M     // Reload R0 to set it back into R1
+    @R1
+    M=D     // Set R1 to R0 as computation is successful
+    @END
+    0;JMP
+
 (END)
     @END
     0;JMP
