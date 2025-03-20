@@ -1,0 +1,43 @@
+push constant 32767
+push constant 1
+add
+neg
+push argument 0
+eq
+if-goto UNDEFINED
+
+push argument 0              
+push constant 0          
+lt
+if-goto NEGATIVE
+
+push argument 0
+pop argument 1
+push constant 0
+pop argument 2
+push constant 0
+pop argument 3
+goto END
+
+
+label UNDEFINED
+
+push constant 1
+pop argument 3
+goto END
+
+
+
+label NEGATIVE
+
+push argument 0
+neg  
+pop argument 1
+
+push constant 1
+pop argument 2
+
+push constant 0
+pop argument 3
+
+label END
